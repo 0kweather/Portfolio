@@ -1,0 +1,303 @@
+/* ============================================================
+   Fonts — ABC Diatype Edu (maps to template's "Diatype")
+   ============================================================ */
+@font-face {
+	font-family: "Diatype";
+	src: url("fonts/ABCDiatypeEdu-Regular.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: block;
+}
+@font-face {
+	font-family: "Diatype";
+	src: url("fonts/ABCDiatypeEdu-RegularItalic.woff2") format("woff2");
+	font-weight: 400;
+	font-style: italic;
+	font-display: block;
+}
+
+/* ============================================================
+   Custom properties
+   ============================================================ */
+:root {
+	/* Desktop root size: a steady 11px (consistent at every desktop width). */
+	--base-size: 11px;
+
+	/* page background (light neutral grey content surface) */
+	--page-bg: #f1f1f0;
+
+	/* opacity-step swatches over black */
+	--swatch-1: rgba(0, 0, 0, 0.85);
+	--swatch-2: rgba(0, 0, 0, 0.75);
+	--swatch-3: rgba(0, 0, 0, 0.6);
+	--swatch-4: rgba(0, 0, 0, 0.4);
+	--swatch-5: rgba(0, 0, 0, 0.25);
+	--swatch-6: rgba(0, 0, 0, 0.15);
+
+	/* spacing */
+	--page-padding: 3.5rem;   /* .page-content padding */
+	--column-max: 50%;        /* .page-layout max-width */
+	--section-gap: 0rem;      /* gap between header rule and content */
+	--border-width: 1px;
+
+	/* derived header clearance (see .pages padding-top):
+	   page_padding(top) + name line-box(1.5*1.2=1.8rem) + hr(margin .5 + 1px + margin .5)
+	   + one-line gap below the rule. */
+	--header-clear: 7rem;
+}
+
+/* ============================================================
+   Reset / base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+	margin: 0;
+	padding: 0;
+	min-height: 100%;
+	/* white so iOS safe-area bars render white; the page surface is painted by .content */
+	background-color: #ffffff;
+}
+
+html {
+	font-size: var(--base-size);
+	-webkit-text-size-adjust: none;
+}
+
+body {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	font-family: "Diatype", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+
+a { color: inherit; }
+
+/* ============================================================
+   Content surface
+   ============================================================ */
+.content {
+	position: relative;
+	min-height: 100vh;
+	min-height: 100svh;
+	background-color: var(--page-bg);
+}
+
+/* ------------------------------------------------------------
+   Header — absolutely pinned to the top of the content area,
+   overlapping the page content beneath it.
+   ------------------------------------------------------------ */
+.site-header {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 10;
+}
+
+/* shared centered column geometry */
+.page-layout {
+	width: 100%;
+	max-width: var(--column-max);
+	margin: 0 auto;
+}
+
+.page-content {
+	padding: var(--page-padding);
+}
+
+/* header row: name (7) | nav (5) */
+.header-row {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+	gap: 12px;
+}
+
+.site-name {
+	flex: 0 1 auto;
+	font-size: 1.5rem;
+	line-height: 1.2;
+	color: var(--swatch-1);
+	letter-spacing: 0;
+	white-space: nowrap;
+}
+
+.site-nav {
+	flex: 1 1 auto;
+	display: flex;
+	justify-content: flex-end;
+	gap: 1.4em;
+	font-size: 1.5rem;
+	line-height: 1.2;
+	white-space: nowrap;
+}
+
+/* nav links: never underlined, lighten on hover */
+.site-nav a {
+	color: var(--swatch-1);
+	text-decoration: none;
+	transition: opacity 120ms ease;
+}
+
+.site-nav a:hover {
+	opacity: 0.55;
+}
+
+hr {
+	background: var(--swatch-2);
+	border: 0;
+	height: var(--border-width);
+	display: block;
+	margin: 0.5rem 0;
+}
+
+/* ------------------------------------------------------------
+   Pages
+   ------------------------------------------------------------ */
+.pages {
+	padding-top: 0;
+}
+
+.page { display: none; }
+
+/* Active pane fills the viewport and vertically centers its content.
+   The symmetric top/bottom padding (= header height) keeps short pages
+   centered while ensuring long pages still clear the absolute header. */
+.page.active {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;   /* vertical centering */
+	align-items: center;       /* horizontal centering of the column */
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 100vh;
+	min-height: 100svh;
+	padding: var(--header-clear) 0;
+}
+
+/* the pane's own vertical padding is handled by .page above; keep only the
+   left/right gutter here so the column doesn't touch the viewport edges */
+.pages .page-content {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+/* ------------------------------------------------------------
+   Typography — body content
+   ------------------------------------------------------------ */
+bodycopy {
+	display: block;
+	font-size: 1.5rem;
+	font-weight: 400;
+	line-height: 1.2;
+	letter-spacing: 0;
+	color: var(--swatch-1);
+	max-width: 100%;
+	word-wrap: break-word;
+}
+
+/* all other links: dotted underline, lighten on hover */
+bodycopy a {
+	color: var(--swatch-1);
+	text-decoration: underline dotted;
+	text-underline-offset: 0.12em;
+	transition: opacity 120ms ease;
+}
+
+bodycopy a:hover {
+	opacity: 0.55;
+}
+
+bodycopy i { font-style: italic; }
+
+a:active,
+bodycopy a:active {
+	opacity: 0.7;
+}
+
+/* bullets sit at the text's left edge (inline with the heading/body),
+   with a larger marker and a hanging indent so wrapped lines line up */
+ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+li {
+	margin: 0;
+	padding-left: 0.9em;          /* item text + wrapped lines hang here */
+}
+
+li::before {
+	content: "•";
+	display: inline-block;
+	width: 0.9em;                 /* marker box spans back to the text margin */
+	margin-left: -0.9em;          /* left edge sits at the heading/text left edge */
+	transform: scale(1.55);       /* enlarge the bullet without disturbing layout */
+	transform-origin: 0% 50%;
+}
+
+/* ============================================================
+   Mobile — <= 800px
+   The column fills the viewport and the header moves into normal
+   flow (no overlap). The root size is reduced so the name + nav
+   stay together on a single line at phone widths.
+   ============================================================ */
+@media (max-width: 800px) {
+	:root {
+		--base-size: 11px;            /* small enough to keep the header on one line */
+		--column-max: 100%;           /* column fills the viewport */
+		--page-padding: 1.5rem;       /* tighter mobile gutter */
+	}
+
+	.site-header {
+		position: static;
+	}
+
+	.header-row {
+		/* keep one line; wrap only as a last resort on very narrow screens */
+		flex-wrap: wrap;
+		row-gap: 0.3rem;
+	}
+
+	.site-nav {
+		gap: 1em;                     /* tighten link spacing to help one-line fit */
+	}
+
+	/* The header is in normal flow on mobile, so vertically center the page
+	   content within the space that remains beneath it: make .content a flex
+	   column, let .pages take the leftover height, and center inside it.
+	   Short pages center; long pages grow and scroll (top-aligned). */
+	.content {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.pages {
+		flex: 1 1 auto;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.page.active {
+		flex: 1 1 auto;
+		justify-content: center;   /* vertical centering in the remaining space */
+		min-height: 0;
+		padding: 0;
+	}
+
+	.pages .page-content {
+		padding-top: var(--page-padding);
+		padding-bottom: var(--page-padding);
+	}
+}
+
+/* ============================================================
+   Small mobile — <= 480px
+   ============================================================ */
+@media (max-width: 480px) {
+	:root {
+		--base-size: 11px;
+		--page-padding: 1.25rem;      /* more room for the one-line header */
+	}
+}
