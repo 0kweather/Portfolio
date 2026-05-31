@@ -55,8 +55,9 @@ html, body {
 	margin: 0;
 	padding: 0;
 	min-height: 100%;
-	/* white so iOS safe-area bars render white; the page surface is painted by .content */
-	background-color: #ffffff;
+	/* paint the page color all the way out so iOS safe-area insets and
+	   overscroll/rubber-banding show the page background, not white */
+	background-color: var(--page-bg);
 }
 
 html {
