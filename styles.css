@@ -245,9 +245,9 @@ li::before {
    ============================================================ */
 @media (max-width: 800px) {
 	:root {
-		--base-size: 11px;            /* small enough to keep the header on one line */
+		--base-size: 10px;            /* 10pt mobile text */
 		--column-max: 100%;           /* column fills the viewport */
-		--page-padding: 1.5rem;       /* tighter mobile gutter */
+		--page-padding: 2.5rem;       /* roomier mobile gutter */
 	}
 
 	.site-header {
@@ -297,7 +297,7 @@ li::before {
    ============================================================ */
 @media (max-width: 480px) {
 	:root {
-		--base-size: 11px;
-		--page-padding: 1.25rem;      /* more room for the one-line header */
+		--base-size: 10px;
+		--page-padding: 2.25rem;
 	}
 }
