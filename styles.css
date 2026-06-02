@@ -80,6 +80,9 @@ a { color: inherit; }
 	position: relative;
 	min-height: 100vh;
 	min-height: 100svh;
+	/* dvh tracks the *live* viewport, so centering stays correct as the
+	   mobile/in-app browser toolbar expands or collapses */
+	min-height: 100dvh;
 	background-color: var(--page-bg);
 }
 
@@ -88,11 +91,13 @@ a { color: inherit; }
    overlapping the page content beneath it.
    ------------------------------------------------------------ */
 .site-header {
-	position: absolute;
+	position: fixed;
 	top: 0;
 	left: 0;
 	right: 0;
 	z-index: 10;
+	/* solid fill so page content scrolls up and vanishes exactly at the rule */
+	background-color: var(--page-bg);
 }
 
 /* shared centered column geometry */
@@ -151,6 +156,11 @@ hr {
 	display: block;
 	margin: 0.5rem 0;
 }
+
+/* The header fill must stop exactly at the rule, with nothing painted below
+   it — so content sliding up disappears right at the line. */
+.site-header .page-content { padding-bottom: 0; }
+.site-header hr { margin-bottom: 0; }
 
 /* ------------------------------------------------------------
    Pages
@@ -254,6 +264,11 @@ li::before {
 	.site-header {
 		position: static;
 	}
+
+	/* header is in normal flow on mobile (no overlap), so keep its original
+	   spacing below the rule */
+	.site-header .page-content { padding-bottom: var(--page-padding); }
+	.site-header hr { margin-bottom: 0.5rem; }
 
 	.header-row {
 		/* keep one line; wrap only as a last resort on very narrow screens */
