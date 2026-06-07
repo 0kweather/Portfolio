@@ -158,9 +158,9 @@ hr {
    ------------------------------------------------------------ */
 .page { display: none; }
 
-/* Active pane fills the viewport and vertically centers its content.
-   The symmetric top/bottom padding (= header height) keeps short pages
-   centered while ensuring long pages still clear the fixed header. */
+/* Active pane fills the viewport. The top padding clears the fixed header;
+   with no bottom padding, the content vertically centers within the space
+   below the rule (header bottom → viewport bottom) rather than the whole page. */
 .page.active {
 	display: flex;
 	flex-direction: column;
@@ -170,7 +170,7 @@ hr {
 	width: 100%;
 	min-height: 100vh;
 	min-height: 100svh;
-	padding: var(--header-clear) 0;
+	padding: var(--header-clear) 0 0;
 }
 
 /* the pane's own vertical padding is handled by .page above; keep only the
@@ -183,6 +183,21 @@ hr {
 /* ------------------------------------------------------------
    Typography — body content
    ------------------------------------------------------------ */
+
+/* Framed portrait above the bio: a thin rule (same weight/shade as the nav
+   line) with a small inset "mat". box-sizing:border-box (set globally) keeps
+   the border's outer edge at the full column width, so the photo shrinks
+   inward by the padding + border. */
+.bio-image {
+	display: block;
+	width: 100%;
+	height: auto;
+	margin-bottom: 1.5rem;
+	padding: 0.55rem;
+	border: var(--border-width) solid var(--swatch-2);
+	background: var(--page-bg);
+}
+
 bodycopy {
 	display: block;
 	font-size: 1.5rem;
