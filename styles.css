@@ -184,20 +184,6 @@ hr {
    Typography — body content
    ------------------------------------------------------------ */
 
-/* Framed portrait below the bio: a thin rule (same weight/shade as the nav
-   line) with a small inset "mat". box-sizing:border-box (set globally) keeps
-   the border's outer edge at the full column width, so the photo shrinks
-   inward by the padding + border. */
-.bio-image {
-	display: block;
-	width: 100%;
-	height: auto;
-	margin-top: 1.5rem;
-	padding: 0.3rem;
-	border: var(--border-width) solid var(--swatch-2);
-	background: var(--page-bg);
-}
-
 bodycopy {
 	display: block;
 	font-size: 1.5rem;
