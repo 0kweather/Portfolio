@@ -23,12 +23,11 @@
 	/* Desktop root size: a steady 11px (consistent at every desktop width). */
 	--base-size: 11px;
 
-	/* page background (light neutral grey content surface) */
-	--page-bg: #f1f1f0;
+	/* page background (warm cream content surface) */
+	--page-bg: #f8f8f6;
 
-	/* opacity-step swatches over black */
-	--swatch-1: rgba(0, 0, 0, 0.85);
-	--swatch-2: rgba(0, 0, 0, 0.75);
+	/* ink color — used for text, the nav rule, and bullets */
+	--swatch-1: #373734;
 
 	/* spacing */
 	--page-padding: 3.5rem;   /* .page-content padding */
@@ -141,7 +140,7 @@ a { color: inherit; }
 }
 
 hr {
-	background: var(--swatch-2);
+	background: var(--swatch-1);
 	border: 0;
 	height: var(--border-width);
 	display: block;
