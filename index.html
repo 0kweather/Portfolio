@@ -16,8 +16,8 @@
 			<div class="header-row">
 				<span class="site-name">alex bronzini-vender</span>
 				<nav class="site-nav">
-					<a href="#/about" data-route="about">about</a>
-					<a href="#/works" data-route="works">works</a>
+					<a href="/" data-route="about">about</a>
+					<a href="#works" data-route="works">works</a>
 				</nav>
 			</div>
 			<hr>
@@ -68,22 +68,37 @@
 
 <script>
 	(function () {
-		var routes = ['about', 'works'];
-		var defaultRoute = routes[0];
+		var defaultRoute = 'about';
+
+		function currentRoute() {
+			var hash = location.hash.replace(/^#/, '');
+			if (hash === '') return 'about';
+			if (hash === 'works') return 'works';
+			return null;
+		}
 
 		function render() {
-			var hash = location.hash.replace(/^#\/?/, '');
-			if (routes.indexOf(hash) === -1) {
-				hash = defaultRoute;
-				location.replace('#/' + defaultRoute);
+			var route = currentRoute();
+			if (!route) {
+				route = defaultRoute;
+				history.replaceState(null, '', location.pathname + location.search);
 			}
 			document.querySelectorAll('[data-page], [data-route]').forEach(function (el) {
-				el.classList.toggle('active', (el.dataset.page || el.dataset.route) === hash);
+				el.classList.toggle('active', (el.dataset.page || el.dataset.route) === route);
 			});
 			window.scrollTo(0, 0);
 		}
 
+		document.querySelectorAll('nav a[data-route="about"]').forEach(function (a) {
+			a.addEventListener('click', function (e) {
+				e.preventDefault();
+				history.pushState(null, '', location.pathname + location.search);
+				render();
+			});
+		});
+
 		window.addEventListener('hashchange', render);
+		window.addEventListener('popstate', render);
 		render();
 	})();
 </script>
