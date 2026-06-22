@@ -195,10 +195,18 @@ bodycopy {
 }
 
 /* all other links: dotted underline, lighten on hover */
+/* text-decoration (not border-bottom): the anchor draws ONE continuous
+   underline across its descendants, so the dotted pattern runs unbroken
+   through nested italics like <i>Hamilton</i>. A border, by contrast, is
+   drawn per inline fragment — the italic child splits the link box into
+   pieces and each piece restarts the dot pattern, bunching dots at the
+   word edges. skip-ink: none keeps descenders from notching the line. */
 bodycopy a {
 	color: var(--swatch-1);
 	text-decoration: underline dotted;
-	text-underline-offset: 0.12em;
+	text-decoration-thickness: 1px;
+	text-decoration-skip-ink: none;
+	text-underline-offset: 0.22em;
 	transition: opacity 120ms ease;
 }
 
