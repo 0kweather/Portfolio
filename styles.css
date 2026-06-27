@@ -34,10 +34,13 @@
 	--column-max: 50%;        /* .page-content max-width */
 	--border-width: 1px;
 
-	/* derived header clearance (see .page.active padding):
-	   page_padding(top) + name line-box(1.5*1.2=1.8rem) + hr(margin .5 + 1px + margin .5)
-	   + one-line gap below the rule. */
-	--header-clear: 7rem;
+	/* exact rendered height of the fixed header, measured to the bottom of
+	   the rule (in the header, the rule has no bottom margin and the
+	   page-content no bottom padding, so the header ends at the rule):
+	   page_padding(top 3.5) + name line-box(1.5*1.2=1.8) + hr margin-top(0.5)
+	   + hr height(1px). The active page is offset by exactly this, so its
+	   content centers in the region between the rule and the viewport bottom. */
+	--header-height: calc(5.8rem + var(--border-width));
 }
 
 /* ============================================================
@@ -157,9 +160,11 @@ hr {
    ------------------------------------------------------------ */
 .page { display: none; }
 
-/* Active pane fills the viewport. The top padding clears the fixed header;
-   with no bottom padding, the content vertically centers within the space
-   below the rule (header bottom → viewport bottom) rather than the whole page. */
+/* Active pane occupies exactly the region between the rule and the viewport
+   bottom: a top margin equal to the fixed header's height drops it below the
+   rule, and min-height fills the rest. Content then centers in that region
+   (not biased by any padding). Taller-than-region content grows the box and
+   scrolls, sliding up under the header and vanishing at the rule. */
 .page.active {
 	display: flex;
 	flex-direction: column;
@@ -167,9 +172,9 @@ hr {
 	align-items: center;       /* horizontal centering of the column */
 	box-sizing: border-box;
 	width: 100%;
-	min-height: 100vh;
-	min-height: 100svh;
-	padding: var(--header-clear) 0 0;
+	margin-top: var(--header-height);
+	min-height: calc(100vh - var(--header-height));
+	min-height: calc(100svh - var(--header-height));
 }
 
 /* the pane's own vertical padding is handled by .page above; keep only the
@@ -286,6 +291,7 @@ li::before {
 		flex: 1 1 auto;
 		justify-content: center;   /* vertical centering in the remaining space */
 		min-height: 0;
+		margin-top: 0;             /* header is in normal flow on mobile */
 		padding: 0;
 	}
 
