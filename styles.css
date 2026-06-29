@@ -158,24 +158,54 @@ hr {
 /* ------------------------------------------------------------
    Pages
    ------------------------------------------------------------ */
-.page { display: none; }
+/* Pages are the positioning context for the crossfade, and the surface that
+   fades in on first load. Hidden by default; revealed (0.15s) once booted. */
+.pages {
+	position: relative;
+	opacity: 0;
+}
 
-/* Active pane occupies exactly the region between the rule and the viewport
-   bottom: a top margin equal to the fixed header's height drops it below the
-   rule, and min-height fills the rest. Content then centers in that region
-   (not biased by any padding). Taller-than-region content grows the box and
-   scrolls, sliding up under the header and vanishing at the rule. */
-.page.active {
+body.loaded .pages {
+	opacity: 1;
+	transition: opacity 0.2s ease;
+}
+
+/* Every pane is laid out the same way and occupies exactly the region between
+   the rule and the viewport bottom: the fixed header's height is reserved as
+   top padding (kept inside the box by border-box) rather than a top margin —
+   a top margin here would collapse out through .content to the body, adding
+   the header's height to the document and letting short pages scroll. Padding
+   keeps the pane exactly one viewport tall, so the text stays fixed and only
+   scrolls when it genuinely overflows. Panes crossfade on opacity (0.4s). */
+.page {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;   /* vertical centering */
 	align-items: center;       /* horizontal centering of the column */
 	box-sizing: border-box;
 	width: 100%;
-	margin-top: var(--header-height);
-	min-height: calc(100vh - var(--header-height));
-	min-height: calc(100svh - var(--header-height));
+	padding-top: var(--header-height);
+	min-height: 100vh;
+	min-height: 100svh;
+	opacity: 0;
+	transition: opacity 0.4s ease;
 }
+
+.page.active { opacity: 1; }
+
+/* Inactive panes stack on top of the active one, pulled out of flow so they
+   add no height (no scroll) and don't capture clicks while they fade out. */
+.page:not(.active) {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	pointer-events: none;
+}
+
+/* On first paint, suppress the per-pane crossfade so the initial reveal is
+   driven solely by the .pages fade-in (0.2s), not the 0.4s page transition. */
+body.is-booting .page { transition: none; }
 
 /* the pane's own vertical padding is handled by .page above; keep only the
    left/right gutter here so the column doesn't touch the viewport edges */

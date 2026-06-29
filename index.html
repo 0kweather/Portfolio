@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#f8f8f6">
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=5">
 <title>Alex Bronzini-Vender</title>
-<link rel="stylesheet" href="styles.css?v=25">
+<link rel="stylesheet" href="styles.css?v=26">
 </head>
 <body>
 <div class="content">
@@ -70,6 +70,10 @@
 	(function () {
 		var defaultRoute = 'about';
 
+		// Show the first page instantly (no per-pane crossfade); the initial
+		// reveal is handled by the .pages fade-in once 'loaded' is added.
+		document.body.classList.add('is-booting');
+
 		function currentRoute() {
 			var hash = location.hash.replace(/^#/, '');
 			if (hash === '') return 'about';
@@ -100,6 +104,15 @@
 		window.addEventListener('hashchange', render);
 		window.addEventListener('popstate', render);
 		render();
+
+		// After the first paint, fade the content in (0.2s) and re-enable the
+		// 0.4s page crossfade for subsequent navigation.
+		requestAnimationFrame(function () {
+			requestAnimationFrame(function () {
+				document.body.classList.add('loaded');
+				document.body.classList.remove('is-booting');
+			});
+		});
 	})();
 </script>
 
