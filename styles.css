@@ -159,7 +159,7 @@ hr {
    Pages
    ------------------------------------------------------------ */
 /* Pages are the positioning context for the crossfade, and the surface that
-   fades in on first load. Hidden by default; revealed (0.15s) once booted. */
+   fades in on first load. Hidden by default; revealed (0.3s) once booted. */
 .pages {
 	position: relative;
 	opacity: 0;
@@ -167,7 +167,7 @@ hr {
 
 body.loaded .pages {
 	opacity: 1;
-	transition: opacity 0.4s ease;
+	transition: opacity 0.3s ease;
 }
 
 /* Every pane is laid out the same way and occupies exactly the region between
@@ -176,7 +176,7 @@ body.loaded .pages {
    a top margin here would collapse out through .content to the body, adding
    the header's height to the document and letting short pages scroll. Padding
    keeps the pane exactly one viewport tall, so the text stays fixed and only
-   scrolls when it genuinely overflows. Panes crossfade on opacity (0.4s). */
+   scrolls when it genuinely overflows. Panes crossfade on opacity (0.3s). */
 .page {
 	display: flex;
 	flex-direction: column;
@@ -188,7 +188,7 @@ body.loaded .pages {
 	min-height: 100vh;
 	min-height: 100svh;
 	opacity: 0;
-	transition: opacity 0.4s ease;
+	transition: opacity 0.3s ease;
 }
 
 .page.active { opacity: 1; }
@@ -204,7 +204,7 @@ body.loaded .pages {
 }
 
 /* On first paint, suppress the per-pane crossfade so the initial reveal is
-   driven solely by the .pages fade-in (0.4s), not the 0.4s page transition. */
+   driven solely by the .pages fade-in (0.3s), not the 0.3s page transition. */
 body.is-booting .page { transition: none; }
 
 /* the pane's own vertical padding is handled by .page above; keep only the

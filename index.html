@@ -105,8 +105,8 @@
 		window.addEventListener('popstate', render);
 		render();
 
-		// After the first paint, fade the content in (0.4s) and re-enable the
-		// 0.4s page crossfade for subsequent navigation.
+		// After the first paint, fade the content in (0.3s) and re-enable the
+		// 0.3s page crossfade for subsequent navigation.
 		requestAnimationFrame(function () {
 			requestAnimationFrame(function () {
 				document.body.classList.add('loaded');
