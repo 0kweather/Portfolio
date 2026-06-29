@@ -167,7 +167,7 @@ hr {
 
 body.loaded .pages {
 	opacity: 1;
-	transition: opacity 0.2s ease;
+	transition: opacity 0.4s ease;
 }
 
 /* Every pane is laid out the same way and occupies exactly the region between
@@ -204,7 +204,7 @@ body.loaded .pages {
 }
 
 /* On first paint, suppress the per-pane crossfade so the initial reveal is
-   driven solely by the .pages fade-in (0.2s), not the 0.4s page transition. */
+   driven solely by the .pages fade-in (0.4s), not the 0.4s page transition. */
 body.is-booting .page { transition: none; }
 
 /* the pane's own vertical padding is handled by .page above; keep only the
