@@ -21,7 +21,7 @@
    ============================================================ */
 :root {
 	/* Desktop root size: a steady 11px (consistent at every desktop width). */
-	--base-size: 11px;
+	--base-size: 12px;
 
 	/* page background (warm cream content surface) */
 	--page-bg: #f8f8f6;
@@ -278,7 +278,7 @@ li::before {
    ============================================================ */
 @media (max-width: 800px) {
 	:root {
-		--base-size: 10px;            /* 10pt mobile text */
+		--base-size: 11px;            /* 11pt mobile text */
 		--column-max: 100%;           /* column fills the viewport */
 		--page-padding: 2.5rem;       /* roomier mobile gutter */
 	}
@@ -336,7 +336,7 @@ li::before {
    ============================================================ */
 @media (max-width: 480px) {
 	:root {
-		--base-size: 10px;
+		--base-size: 11px;
 		--page-padding: 2.25rem;
 	}
 }
