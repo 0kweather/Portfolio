@@ -41,6 +41,9 @@
 	   + hr height(1px). The active page is offset by exactly this, so its
 	   content centers in the region between the rule and the viewport bottom. */
 	--header-height: calc(5.8rem + var(--border-width));
+
+	/* shared easing for fades — gentle ease-out (cubic-bezier(0.22,1,0.36,1)) */
+	--ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ============================================================
@@ -188,7 +191,7 @@ body.loaded .pages {
 	min-height: 100vh;
 	min-height: 100svh;
 	opacity: 0;
-	transition: opacity 0.3s ease;
+	transition: opacity 0.3s var(--ease);
 }
 
 .page.active { opacity: 1; }
