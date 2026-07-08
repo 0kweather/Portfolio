@@ -102,10 +102,8 @@ a { color: inherit; }
    ============================================================ */
 .main { min-width: 0; }
 
-.page { opacity: 0; transition: opacity 0.3s var(--ease); }
-.page.active { opacity: 1; }
-.page:not(.active) { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
-body.is-booting .page { transition: none; }
+.page { display: none; }
+.page.active { display: block; }
 
 .bodycopy {
 	margin: 0;
