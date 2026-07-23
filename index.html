@@ -48,7 +48,6 @@
 html, body { margin: 0; padding: 0; min-height: 100%; background-color: var(--page-bg); }
 html {
 	font-size: var(--base-size); -webkit-text-size-adjust: none;
-	scroll-behavior: smooth;
 }
 body {
 	-webkit-font-smoothing: antialiased;
@@ -131,7 +130,7 @@ a { color: inherit; }
 
 .works-list { list-style: none; margin: 0; padding: 0; }
 .works-list li {
-	position: relative; padding-left: 0.9em; margin: 0;
+	padding-left: 0.9em; margin: 0;
 	font-size: 1.5rem; line-height: 1.32; color: var(--ink);
 }
 .works-list li::before {
@@ -157,7 +156,6 @@ a { color: inherit; }
    Reduced motion
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
-	html { scroll-behavior: auto; }
 	*, *::before, *::after { transition-duration: 0.001ms !important; }
 }
 
@@ -180,7 +178,7 @@ a { color: inherit; }
 <body>
 <div class="wrap">
 
-	<aside class="rail">
+	<aside>
 		<div class="rail-inner">
 			<h1 class="site-name">alex bronzini-vender</h1>
 			<nav class="site-nav">
@@ -245,7 +243,6 @@ a { color: inherit; }
 <script>
 	(function () {
 		var defaultRoute = 'about';
-		document.body.classList.add('is-booting');
 
 		function currentRoute() {
 			var hash = location.hash.replace(/^#/, '');
@@ -283,7 +280,6 @@ a { color: inherit; }
 		requestAnimationFrame(function () {
 			requestAnimationFrame(function () {
 				document.body.classList.add('loaded');
-				document.body.classList.remove('is-booting');
 			});
 		});
 	})();
