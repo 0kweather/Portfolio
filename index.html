@@ -39,6 +39,11 @@
 	--pad: clamp(2rem, 5vw, 5rem);
 	--gap: clamp(2.5rem, 7vw, 7rem);
 	--inset: 40px;  /* top/left gap for the rail; also drives the main column's centering math */
+	--main-w: 632px;   /* content column's natural width */
+	/* leftmost x the content column may occupy: past the fixed rail plus a
+	   gap. The rail is out of flow, so without this the centered column
+	   slides underneath it on narrower desktop widths. */
+	--rail-space: calc(var(--inset) + 144px + var(--inset) * 2);
 	--ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -101,10 +106,12 @@ a { color: inherit; }
    Main column / pages
    ============================================================ */
 .main {
-	/* fixed at its current rendered width, centered on the full page,
-	   independent of the rail */
-	width: min(632px, calc(100% - 2 * var(--inset)));
-	margin: 0 auto;
+	/* centered on the full page at its natural width, but never allowed to
+	   cross into the fixed rail: once centering would put it left of
+	   --rail-space, it parks there instead and narrows to keep the right inset */
+	width: min(var(--main-w), calc(100% - var(--rail-space) - var(--inset)));
+	margin-left: max(var(--rail-space), calc((100% - var(--main-w)) / 2));
+	margin-right: auto;
 }
 
 .page { display: none; }
