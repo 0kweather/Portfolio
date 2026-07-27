@@ -38,6 +38,7 @@
 	--accent: #a23c25;        /* oxblood — keyboard focus outline */
 	--pad: clamp(2rem, 5vw, 5rem);
 	--gap: clamp(2.5rem, 7vw, 7rem);
+	--inset: 40px;  /* top/left gap for the rail; also drives the main column's centering math */
 	--ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -62,28 +63,28 @@ a { color: inherit; }
 :focus-visible { outline: 1.5px solid var(--accent); outline-offset: 3px; border-radius: 1px; }
 
 /* ============================================================
-   Layout — sticky identity rail + scrolling column
+   Layout — fixed identity rail + centered content column
    ============================================================ */
 .wrap {
-	max-width: 1080px; margin: 0 auto;
-	padding: clamp(3rem, 8vh, 7rem) var(--pad) clamp(3rem, 8vh, 6rem);
-	display: grid;
-	grid-template-columns: minmax(190px, 24%) 1fr;
-	gap: var(--gap);
+	margin: 0;
+	padding-top: var(--inset);
+	padding-bottom: clamp(3rem, 8vh, 6rem);
 }
 
+/* the rail is fixed at a constant 40px/40px, independent of the main
+   column's own centering below */
 .rail-inner {
-	position: sticky; top: clamp(3rem, 8vh, 7rem);
+	position: fixed; top: var(--inset); left: var(--inset);
 }
 .site-name {
 	margin: 0;
-	font-size: 1.5rem; font-weight: 500; line-height: 1.15;
+	font-size: 1.5rem; font-weight: 500; line-height: 1.1;
 	letter-spacing: -0.015em; color: var(--ink);
 }
 .site-nav {
 	margin-top: 1.9rem;
 	display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;
-	font-size: 1.5rem; line-height: 1.35;
+	font-size: 1.5rem; line-height: 1.3;
 }
 .site-nav a {
 	color: var(--muted);
@@ -99,15 +100,20 @@ a { color: inherit; }
 /* ============================================================
    Main column / pages
    ============================================================ */
-.main { min-width: 0; }
+.main {
+	/* fixed at its current rendered width, centered on the full page,
+	   independent of the rail */
+	width: min(632px, calc(100% - 2 * var(--inset)));
+	margin: 0 auto;
+}
 
 .page { display: none; }
 .page.active { display: block; }
 
 .bodycopy {
 	margin: 0;
-	font-size: 1.5rem; font-weight: 400; line-height: 1.32;
-	color: var(--ink); max-width: 35em; word-wrap: break-word;
+	font-size: 1.5rem; font-weight: 400; line-height: 1.27;
+	color: var(--ink); word-wrap: break-word;
 }
 .bodycopy i { font-style: italic; }
 .bodycopy a {
@@ -124,14 +130,14 @@ a { color: inherit; }
 .work-group + .work-group { margin-top: 2.2rem; }
 .group-label {
 	margin: 0 0 0.6rem;
-	font-size: 1.5rem; font-weight: 500; line-height: 1.3;
+	font-size: 1.5rem; font-weight: 500; line-height: 1.25;
 	color: var(--ink);
 }
 
 .works-list { list-style: none; margin: 0; padding: 0; }
 .works-list li {
 	padding-left: 0.9em; margin: 0;
-	font-size: 1.5rem; line-height: 1.32; color: var(--ink);
+	font-size: 1.5rem; line-height: 1.27; color: var(--ink);
 }
 .works-list li::before {
 	content: "\2022"; display: inline-block;
@@ -164,11 +170,10 @@ a { color: inherit; }
    ============================================================ */
 @media (max-width: 760px) {
 	.wrap {
-		grid-template-columns: 1fr;
-		gap: clamp(2.2rem, 8vw, 3rem);
-		padding-top: clamp(2.5rem, 6vh, 4rem);
+		padding: var(--pad);   /* top gap matches the left gap */
 	}
-	.rail-inner { position: static; }
+	.rail-inner { position: static; margin-bottom: clamp(2.2rem, 8vw, 3rem); }
+	.main { width: auto; margin: 0; }
 	.site-nav {
 		flex-direction: row; gap: 1.4em; margin-top: 1.3rem;
 	}
