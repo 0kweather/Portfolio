@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#fdfdfc">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>Alex Bronzini-Vender</title>
@@ -33,6 +33,7 @@
 :root {
 	--base-size: 11px;        /* everything is sized in rem, so this scales the whole page */
 	--page-bg: #fdfdfc;       /* warm off-white */
+	--page-bg-fade: rgba(253, 253, 252, 0);   /* same hue at zero alpha — see body::after */
 	--ink: #24231f;           /* near-black text */
 	--muted: #78746a;         /* works dates — lighter than body text */
 	--rule: #dcd9d2;          /* hairlines between works rows */
@@ -72,7 +73,7 @@ a { color: inherit; }
 	/* symmetric inset makes .main's 50% resolve to exactly half the page;
 	   the extra bottom padding keeps content clear of the fixed toggle */
 	padding: var(--inset);
-	padding-bottom: calc(var(--inset) * 2 + 3rem);
+	padding-bottom: calc(var(--inset) * 2 + 3rem + env(safe-area-inset-bottom, 0px));
 }
 
 /* content dissolves into the page before it reaches the fixed toggle,
@@ -80,8 +81,15 @@ a { color: inherit; }
 body::after {
 	content: "";
 	position: fixed; left: 0; right: 0; bottom: 0;
-	height: calc(var(--inset) + 5rem);
-	background: linear-gradient(to top, var(--page-bg) 45%, transparent);
+	/* runs under iOS Safari's floating toolbar so nothing shows through behind it */
+	height: calc(var(--inset) + 6rem + env(safe-area-inset-bottom, 0px));
+	/* fades to the page colour at zero alpha rather than the `transparent`
+	   keyword — `transparent` is transparent *black*, which Safari interpolates
+	   through, greying the ramp instead of dissolving cleanly */
+	background: linear-gradient(to top,
+		var(--page-bg) 0%,
+		var(--page-bg) 55%,
+		var(--page-bg-fade) 100%);
 	pointer-events: none;
 	z-index: 5;
 }
@@ -89,7 +97,8 @@ body::after {
 /* ---------- toggle: fixed rounded-rectangle buttons with a status dot ---------- */
 .site-nav {
 	position: fixed;
-	left: var(--inset); bottom: var(--inset);
+	left: var(--inset);
+	bottom: calc(var(--inset) + env(safe-area-inset-bottom, 0px));
 	z-index: 10;
 	display: flex; gap: 0.4rem;
 	font-size: 1.5rem; line-height: 1;
@@ -118,6 +127,19 @@ body::after {
    no-op — nothing to preview, since it's already the current page. */
 .site-nav a:hover::before { background: currentColor; }
 .site-nav:has(a:not(.current):hover) a.current::before { background: transparent; }
+
+/* icon buttons: square, no status dot. Padding matches the text buttons and
+   the glyph is 1em — the same box the labels occupy — so heights agree. */
+.site-nav a.icon {
+	padding: 0.3em;
+	gap: 0;
+	justify-content: center;
+}
+.site-nav a.icon::before { content: none; }
+.site-nav a.icon svg {
+	display: block;
+	width: 1em; height: 1em;
+}
 
 /* ============================================================
    Main column / pages
@@ -184,7 +206,8 @@ body::after {
 }
 /* column separation lives inside the cells, keeping the rules continuous */
 .works-list .title, .works-list .pub { padding-right: 1.5em; }
-.work-group:last-child .works-list li:last-child > * {
+/* every group closes with a rule, not just the final group on the page */
+.works-list li:last-child > * {
 	border-bottom: 1px solid var(--rule);
 }
 
@@ -199,13 +222,14 @@ body::after {
 .works-list a:hover { text-decoration-color: transparent; }   /* underline transitions out */
 .works-list a i { font-style: italic; }
 .works-list .pub { font-style: italic; }
-.works-list .date { color: var(--muted); white-space: nowrap; }
+.works-list .date { color: var(--muted); white-space: nowrap; text-align: right; }
 
 /* when the column itself is too tight for all three, drop the date */
 @container (max-width: 520px) {
 	.page.active.works-table { grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); }
 	.works-list .date { display: none; }
-	.works-list .pub { padding-right: 0; }   /* now the last column */
+	/* publication becomes the last column, so it takes over the right edge */
+	.works-list .pub { padding-right: 0; text-align: right; }
 }
 
 /* ============================================================
@@ -226,10 +250,14 @@ body::after {
 	:root { --base-size: 10px; --pad: 24px; }
 	.wrap {
 		padding: var(--pad);   /* top gap matches the left gap */
-		padding-bottom: calc(var(--pad) + 4rem);   /* clear the fixed toggle */
+		/* clear the fixed toggle, plus iOS Safari's toolbar inset */
+		padding-bottom: calc(var(--pad) + 4rem + env(safe-area-inset-bottom, 0px));
 	}
 	.main { width: auto; }   /* full width on phones */
-	.site-nav { left: var(--pad); bottom: var(--pad); }
+	.site-nav {
+		left: var(--pad);
+		bottom: calc(var(--pad) + env(safe-area-inset-bottom, 0px));
+	}
 }
 </style>
 </head>
@@ -291,6 +319,12 @@ body::after {
 <nav class="site-nav">
 	<a href="/" data-route="about">about</a>
 	<a href="#works" data-route="works">works</a>
+	<a class="icon" href="mailto:alexanderbronzini@gmail.com" aria-label="Email Alex Bronzini-Vender">
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+	</a>
+	<a class="icon" href="https://x.com/alexbronzini" target="_blank" rel="noopener" aria-label="Alex Bronzini-Vender on Twitter">
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+	</a>
 </nav>
 
 <script>
