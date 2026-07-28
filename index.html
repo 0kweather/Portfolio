@@ -41,6 +41,8 @@
 	--chip: #eceae5;          /* toggle button background */
 	--pad: 32px;    /* mobile page margin */
 	--inset: 32px;  /* desktop page margin — also the toggle's offset from the corner */
+	--fade-h: calc(var(--inset) + 6rem + env(safe-area-inset-bottom, 0px));  /* bottom fade */
+	--fade-over: 30vh;   /* how far the fade overhangs the viewport — see body::after */
 	--ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -57,9 +59,12 @@ body {
 	-moz-osx-font-smoothing: grayscale;
 	font-family: "Diatype", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
 	color: var(--ink);
-	/* CSS-driven so the page can never be left invisible if JS fails to run */
-	animation: fade-in 0.4s var(--ease) both;
 }
+/* The load fade lives on the content, never on <body>: an animation on an
+   ancestor can make Safari resolve position: fixed against that ancestor
+   instead of the viewport, which drags the toggle and its fade up the page.
+   Still CSS-driven, so the page can't be left invisible if JS fails to run. */
+.wrap, .site-nav { animation: fade-in 0.4s var(--ease) both; }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 a { color: inherit; }
 :focus { outline: none; }
@@ -76,19 +81,23 @@ a { color: inherit; }
 	padding-bottom: calc(var(--inset) * 2 + 3rem + env(safe-area-inset-bottom, 0px));
 }
 
-/* content dissolves into the page before it reaches the fixed toggle,
-   so scrolling text never collides with the pills */
+/* Content dissolves into the page before it reaches the fixed toggle.
+   The element deliberately overhangs the bottom of the viewport by --fade-over:
+   iOS Safari's floating toolbar grows the viewport as it collapses, and a fade
+   anchored exactly at bottom: 0 stops short, leaving a band of un-faded text
+   visible beneath it. The overhang is solid page colour, so that band is
+   covered no matter where Safari puts the bottom edge. */
 body::after {
 	content: "";
-	position: fixed; left: 0; right: 0; bottom: 0;
-	/* runs under iOS Safari's floating toolbar so nothing shows through behind it */
-	height: calc(var(--inset) + 6rem + env(safe-area-inset-bottom, 0px));
+	position: fixed; left: 0; right: 0;
+	bottom: calc(var(--fade-over) * -1);
+	height: calc(var(--fade-h) + var(--fade-over));
 	/* fades to the page colour at zero alpha rather than the `transparent`
 	   keyword — `transparent` is transparent *black*, which Safari interpolates
 	   through, greying the ramp instead of dissolving cleanly */
 	background: linear-gradient(to top,
 		var(--page-bg) 0%,
-		var(--page-bg) 55%,
+		var(--page-bg) calc(var(--fade-over) + 3rem),
 		var(--page-bg-fade) 100%);
 	pointer-events: none;
 	z-index: 5;
@@ -248,7 +257,10 @@ body::after {
    ============================================================ */
 @media (max-width: 760px) {
 	/* everything is sized in rem, so this scales the whole page down at once */
-	:root { --base-size: 10px; --pad: 24px; }
+	:root {
+		--base-size: 10px; --pad: 24px;
+		--fade-h: calc(var(--pad) + 6rem + env(safe-area-inset-bottom, 0px));
+	}
 	.wrap {
 		padding: var(--pad);   /* top gap matches the left gap */
 		/* clear the fixed toggle, plus iOS Safari's toolbar inset */
