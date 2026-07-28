@@ -31,18 +31,15 @@
    Tokens
    ============================================================ */
 :root {
-	--base-size: 11px;
+	--base-size: 11px;        /* everything is sized in rem, so this scales the whole page */
 	--page-bg: #fdfdfc;       /* warm off-white */
 	--ink: #24231f;           /* near-black text */
+	--muted: #78746a;         /* works dates — lighter than body text */
+	--rule: #dcd9d2;          /* hairlines between works rows */
 	--accent: #a23c25;        /* oxblood — keyboard focus outline */
-	--pad: clamp(2rem, 5vw, 5rem);
-	--inset: 40px;  /* top/left gap for the rail; also drives the main column's centering math */
-	--main-w: 560px;   /* content column's natural width */
-	--date-col: 4.2em;  /* right strip reserved for the works dates */
-	/* leftmost x the content column may occupy: past the fixed rail plus a
-	   gap. The rail is out of flow, so without this the centered column
-	   slides underneath it on narrower desktop widths. */
-	--rail-space: calc(var(--inset) + 144px + var(--inset) * 2);
+	--chip: #eceae5;          /* toggle button background */
+	--pad: 32px;    /* mobile page margin */
+	--inset: 32px;  /* desktop page margin — also the toggle's offset from the corner */
 	--ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -68,49 +65,69 @@ a { color: inherit; }
 :focus-visible { outline: 1.5px solid var(--accent); outline-offset: 3px; border-radius: 1px; }
 
 /* ============================================================
-   Layout — fixed identity rail + centered content column
+   Layout — content in the left half, floating toggle bottom-left
    ============================================================ */
 .wrap {
 	margin: 0;
-	padding-top: var(--inset);
-	padding-bottom: clamp(3rem, 8vh, 6rem);
+	/* symmetric inset makes .main's 50% resolve to exactly half the page;
+	   the extra bottom padding keeps content clear of the fixed toggle */
+	padding: var(--inset);
+	padding-bottom: calc(var(--inset) * 2 + 3rem);
 }
 
-/* the rail is fixed at a constant 40px/40px, independent of the main
-   column's own centering below */
-.rail-inner {
-	position: fixed; top: var(--inset); left: var(--inset);
+/* content dissolves into the page before it reaches the fixed toggle,
+   so scrolling text never collides with the pills */
+body::after {
+	content: "";
+	position: fixed; left: 0; right: 0; bottom: 0;
+	height: calc(var(--inset) + 5rem);
+	background: linear-gradient(to top, var(--page-bg) 45%, transparent);
+	pointer-events: none;
+	z-index: 5;
 }
-.site-name {
-	margin: 0;
-	font-size: 1.5rem; font-weight: 500; line-height: 1.1;
-	letter-spacing: -0.015em; color: var(--ink);
-}
+
+/* ---------- toggle: fixed rounded-rectangle buttons with a status dot ---------- */
 .site-nav {
-	margin-top: 1.9rem;
-	display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;
-	font-size: 1.5rem; line-height: 1.3;
+	position: fixed;
+	left: var(--inset); bottom: var(--inset);
+	z-index: 10;
+	display: flex; gap: 0.4rem;
+	font-size: 1.5rem; line-height: 1;
 }
 .site-nav a {
+	display: inline-flex; align-items: center; gap: 0.5em;
+	padding: 0.3em 0.6em;
+	border-radius: 6px;
+	background: var(--chip);
 	color: var(--ink);
-	text-decoration: underline;
-	text-decoration-thickness: 1px;
-	text-decoration-color: transparent;   /* underline hidden until hover */
-	text-underline-offset: 0.14em;
-	transition: text-decoration-color 260ms var(--ease);
+	text-decoration: none;
+	/* background never changes — only the dot reacts */
 }
-.site-nav a:hover { text-decoration-color: var(--ink); }   /* underline transitions in */
+.site-nav a::before {
+	content: "";
+	width: 0.5em; height: 0.5em;
+	box-sizing: border-box;
+	border: 1px solid currentColor;
+	border-radius: 50%;
+	background: transparent;   /* hollow = inactive */
+	transition: background 180ms var(--ease);
+}
+.site-nav a.current::before { background: currentColor; }   /* filled = active */
+/* hovering the *other* (non-active) button previews the swap: it fills in,
+   and the active button hollows out. Hovering the active button itself is a
+   no-op — nothing to preview, since it's already the current page. */
+.site-nav a:hover::before { background: currentColor; }
+.site-nav:has(a:not(.current):hover) a.current::before { background: transparent; }
 
 /* ============================================================
    Main column / pages
    ============================================================ */
 .main {
-	/* centered on the full page at its natural width, but never allowed to
-	   cross into the fixed rail: once centering would put it left of
-	   --rail-space, it parks there instead and narrows to keep the right inset */
-	width: min(var(--main-w), calc(100% - var(--rail-space) - var(--inset)));
-	margin-left: max(var(--rail-space), calc((100% - var(--main-w)) / 2));
-	margin-right: auto;
+	/* left-anchored, spanning to the halfway mark: with .wrap's symmetric
+	   inset, 50% of its content box puts the right edge at exactly 50vw */
+	width: 50%;
+	/* lets the works table respond to its own width rather than the viewport's */
+	container-type: inline-size;
 }
 
 .page { display: none; }
@@ -122,6 +139,7 @@ a { color: inherit; }
 	color: var(--ink); overflow-wrap: break-word;
 }
 .bodycopy i { font-style: italic; }
+.bodycopy .name { font-weight: 500; }   /* matches .group-label's weight */
 .bodycopy a {
 	color: var(--ink);
 	text-decoration: underline;
@@ -132,28 +150,44 @@ a { color: inherit; }
 }
 .bodycopy a:hover { text-decoration-color: transparent; }   /* underline transitions out */
 
-/* ---------- works ---------- */
-.work-group + .work-group { margin-top: 2.2rem; }
+/* ---------- works: one table across every category ---------- */
+/* the whole section is a single grid so the date and publication columns
+   line up across groups, not just within one; the wrappers collapse via
+   display: contents so their rows join that shared grid */
+.page.active.works-table {
+	display: grid;
+	/* title dominates; publication takes the remainder and wraps rather than
+	   forcing its column as wide as the longest masthead */
+	grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr) auto;
+	/* no column-gap: gaps would break each row's rule into segments. Columns
+	   are separated by padding inside the cells instead, so the border-tops
+	   meet and read as one unbroken line. */
+	column-gap: 0;
+}
+.work-group, .works-list { display: contents; }
+.works-list { list-style: none; margin: 0; padding: 0; }
+.works-list li { display: contents; }
+
 .group-label {
-	margin: 0 0 0.6rem;
+	grid-column: 1 / -1;
+	margin: 2.4rem 0 0.5rem;
 	font-size: 1.5rem; font-weight: 500; line-height: 1.25;
 	color: var(--ink);
 }
+.work-group:first-child .group-label { margin-top: 0; }
 
-.works-list { list-style: none; margin: 0; padding: 0; }
-.works-list li {
-	position: relative;
-	/* right padding reserves the date strip, so the title text wraps earlier
-	   rather than the block growing wider */
-	padding-left: 0.9em; padding-right: var(--date-col); margin: 0;
+/* each cell carries the rule, so together they read as one full-width line */
+.works-list li > * {
+	border-top: 1px solid var(--rule);
+	padding: 0.28em 0;
 	font-size: 1.5rem; line-height: 1.27; color: var(--ink);
 }
-.works-list li::before {
-	content: "\2022"; display: inline-block;
-	width: 0.9em; margin-left: -0.9em;
-	transform: scale(1.55); transform-origin: 0% 50%;
-	color: var(--ink);
+/* column separation lives inside the cells, keeping the rules continuous */
+.works-list .title, .works-list .pub { padding-right: 1.5em; }
+.work-group:last-child .works-list li:last-child > * {
+	border-bottom: 1px solid var(--rule);
 }
+
 .works-list a {
 	color: var(--ink);
 	text-decoration: underline;
@@ -165,10 +199,13 @@ a { color: inherit; }
 .works-list a:hover { text-decoration-color: transparent; }   /* underline transitions out */
 .works-list a i { font-style: italic; }
 .works-list .pub { font-style: italic; }
-/* dates form their own right-aligned column, flush to the content column's
-   existing right edge — never past it */
-.works-list .date {
-	position: absolute; right: 0; top: 0;
+.works-list .date { color: var(--muted); white-space: nowrap; }
+
+/* when the column itself is too tight for all three, drop the date */
+@container (max-width: 520px) {
+	.page.active.works-table { grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); }
+	.works-list .date { display: none; }
+	.works-list .pub { padding-right: 0; }   /* now the last column */
 }
 
 /* ============================================================
@@ -185,73 +222,63 @@ a { color: inherit; }
    Mobile — rail stacks on top
    ============================================================ */
 @media (max-width: 760px) {
+	/* everything is sized in rem, so this scales the whole page down at once */
+	:root { --base-size: 10px; --pad: 24px; }
 	.wrap {
 		padding: var(--pad);   /* top gap matches the left gap */
+		padding-bottom: calc(var(--pad) + 4rem);   /* clear the fixed toggle */
 	}
-	.rail-inner { position: static; margin-bottom: clamp(2.2rem, 8vw, 3rem); }
-	.main { width: auto; margin: 0; }
-	.site-nav {
-		flex-direction: row; gap: 1.4em; margin-top: 1.3rem;
-	}
+	.main { width: auto; }   /* full width on phones */
+	.site-nav { left: var(--pad); bottom: var(--pad); }
 }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-	<aside>
-		<div class="rail-inner">
-			<h1 class="site-name">alex bronzini-vender</h1>
-			<nav class="site-nav">
-				<a href="/" data-route="about">about</a>
-				<a href="#works" data-route="works">works</a>
-			</nav>
-		</div>
-	</aside>
-
 	<main class="main">
 
 		<section class="page active" data-page="about">
-			<p class="bodycopy">I&rsquo;m a freelance writer from New York, NY. Currently, I am an editorial intern at the <i>Washington Monthly</i> and a member of the editorial board of <i>The Harvard Crimson</i>. My writing has appeared in <i>The New York Times</i>, <i>The Guardian</i>, <i>New York</i>, <i>POLITICO Magazine</i>, <i>The Baffler</i>, <i>Jacobin</i>, and elsewhere. At Harvard College, I study history and government. I tweet from <a target="_blank" rel="noopener" href="https://x.com/alexbronzini">@alexbronzini</a>, and you can email me <a href="mailto:alexanderbronzini@gmail.com">here</a>.</p>
+			<p class="bodycopy"><span class="name">alex bronzini-vender</span> is a freelance writer from New York, NY. He is currently an editorial intern at the <i>Washington Monthly</i> and a member of the editorial board of <i>The Harvard Crimson</i>. His writing has appeared in <i>The New York Times</i>, <i>The Guardian</i>, <i>New York</i>, <i>POLITICO Magazine</i>, <i>The Baffler</i>, <i>Jacobin</i>, and elsewhere. At Harvard College, he studies history and government. He tweets from <a target="_blank" rel="noopener" href="https://x.com/alexbronzini">@alexbronzini</a>, and can be emailed <a href="mailto:alexanderbronzini@gmail.com">here</a>.</p>
 		</section>
 
-		<section class="page" data-page="works">
+		<section class="page works-table" data-page="works">
 
 			<div class="work-group">
 				<h2 class="group-label">on culture and arts</h2>
 				<ul class="works-list">
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://jacobin.com/2026/06/the-hamilton-era-is-gone-forever/">The <i>Hamilton</i> Era Is Gone Forever</a>,&rdquo; <span class="pub">Jacobin</span> <span class="date">6.26</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://jacobin.com/2026/06/the-hamilton-era-is-gone-forever/">The <i>Hamilton</i> Era Is Gone Forever</a></span><span class="pub">Jacobin</span><span class="date">6.26</span></li>
 				</ul>
 			</div>
 
 			<div class="work-group">
 				<h2 class="group-label">on education</h2>
 				<ul class="works-list">
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://washingtonmonthly.com/2026/05/19/fear-and-loathing-in-palo-alto/">Fear and Loathing in Palo Alto</a>,&rdquo; <span class="pub">Washington Monthly</span> <span class="date">5.26</span></li>
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://chronicleofhighereducation.substack.com/p/elise-stefanik-goes-woke">Elise Stefanik Goes Woke</a>,&rdquo; <span class="pub">The Chronicle of Higher Education</span> <span class="date">3.26</span></li>
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://washingtonmonthly.com/2026/02/18/how-trump-learned-to-stop-worrying-and-love-dei/">How Trump Learned to Stop Worrying and Love DEI</a>,&rdquo; <span class="pub">Washington Monthly</span> <span class="date">2.26</span></li>
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://www.nytimes.com/2025/12/29/opinion/harvards-campus-speech-trump.html">At Harvard and Elsewhere, the New Campus Orthodoxy Is Even More Stifling</a>,&rdquo; <span class="pub">The New York Times</span> <span class="date">12.25</span></li>
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://www.nytimes.com/2025/07/15/opinion/college-admissions-essays.html?smid=url-share">Elite Colleges Have Found a New Virtue for Applicants to Fake</a>,&rdquo; <span class="pub">The New York Times</span> <span class="date">7.25</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://washingtonmonthly.com/2026/05/19/fear-and-loathing-in-palo-alto/">Fear and Loathing in Palo Alto</a></span><span class="pub">Washington Monthly</span><span class="date">5.26</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://chronicleofhighereducation.substack.com/p/elise-stefanik-goes-woke">Elise Stefanik Goes Woke</a></span><span class="pub">The Chronicle of Higher Education</span><span class="date">3.26</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://washingtonmonthly.com/2026/02/18/how-trump-learned-to-stop-worrying-and-love-dei/">How Trump Learned to Stop Worrying and Love DEI</a></span><span class="pub">Washington Monthly</span><span class="date">2.26</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://www.nytimes.com/2025/12/29/opinion/harvards-campus-speech-trump.html">At Harvard and Elsewhere, the New Campus Orthodoxy Is Even More Stifling</a></span><span class="pub">The New York Times</span><span class="date">12.25</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://www.nytimes.com/2025/07/15/opinion/college-admissions-essays.html?smid=url-share">Elite Colleges Have Found a New Virtue for Applicants to Fake</a></span><span class="pub">The New York Times</span><span class="date">7.25</span></li>
 				</ul>
 			</div>
 
 			<div class="work-group">
 				<h2 class="group-label">on elections and politicians</h2>
 				<ul class="works-list">
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://www.theguardian.com/commentisfree/2026/apr/27/democrats-authenticity-politics">Democrats think swearing will fix their authenticity problem. It won&rsquo;t</a>,&rdquo; <span class="pub">The Guardian</span> <span class="date">4.26</span></li>
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://thebaffler.com/latest/its-his-turn-bronzini-vender">It&rsquo;s His Turn</a>,&rdquo; <span class="pub">The Baffler</span> <span class="date">2.26</span></li>
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://www.politico.com/news/magazine/2025/09/26/kamala-harris-book-tour-new-york-dispatch-00581004">Kamala Harris&rsquo; Alternate Reality Book Tour</a>,&rdquo; <span class="pub">POLITICO Magazine</span> <span class="date">9.25</span></li>
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://www.theguardian.com/commentisfree/2025/jul/21/democrats-non-voters-election-2028">Are non-voters the key to Democrats winning in 2028?</a>,&rdquo; <span class="pub">The Guardian</span> <span class="date">7.25</span></li>
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://thebaffler.com/latest/come-one-come-all-bronzini-vender">Come One, Come All!</a>&rdquo; <span class="pub">The Baffler</span> <span class="date">6.25</span></li>
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://thebaffler.com/latest/abundance-mindset-bronzini-vender">Abundance Mindset</a>,&rdquo; <span class="pub">The Baffler</span> <span class="date">3.25</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://www.theguardian.com/commentisfree/2026/apr/27/democrats-authenticity-politics">Democrats think swearing will fix their authenticity problem. It won&rsquo;t</a></span><span class="pub">The Guardian</span><span class="date">4.26</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://thebaffler.com/latest/its-his-turn-bronzini-vender">It&rsquo;s His Turn</a></span><span class="pub">The Baffler</span><span class="date">2.26</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://www.politico.com/news/magazine/2025/09/26/kamala-harris-book-tour-new-york-dispatch-00581004">Kamala Harris&rsquo; Alternate Reality Book Tour</a></span><span class="pub">POLITICO Magazine</span><span class="date">9.25</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://www.theguardian.com/commentisfree/2025/jul/21/democrats-non-voters-election-2028">Are non-voters the key to Democrats winning in 2028?</a></span><span class="pub">The Guardian</span><span class="date">7.25</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://thebaffler.com/latest/come-one-come-all-bronzini-vender">Come One, Come All!</a></span><span class="pub">The Baffler</span><span class="date">6.25</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://thebaffler.com/latest/abundance-mindset-bronzini-vender">Abundance Mindset</a></span><span class="pub">The Baffler</span><span class="date">3.25</span></li>
 				</ul>
 			</div>
 
 			<div class="work-group">
 				<h2 class="group-label">on technology</h2>
 				<ul class="works-list">
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://www.thenewcritic.com/p/manifest-man">Manifest Man</a>,&rdquo; <span class="pub">The New Critic</span> <span class="date">7.26</span></li>
-					<li>&ldquo;<a target="_blank" rel="noopener" href="https://nymag.com/intelligencer/article/palantir-yale-conference-ai.html">Palantir Comes to Campus</a>,&rdquo; <span class="pub">New York</span> <span class="date">5.26</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://www.thenewcritic.com/p/manifest-man">Manifest Man</a></span><span class="pub">The New Critic</span><span class="date">7.26</span></li>
+					<li><span class="title"><a target="_blank" rel="noopener" href="https://nymag.com/intelligencer/article/palantir-yale-conference-ai.html">Palantir Comes to Campus</a></span><span class="pub">New York</span><span class="date">5.26</span></li>
 				</ul>
 			</div>
 
@@ -260,6 +287,11 @@ a { color: inherit; }
 	</main>
 
 </div>
+
+<nav class="site-nav">
+	<a href="/" data-route="about">about</a>
+	<a href="#works" data-route="works">works</a>
+</nav>
 
 <script>
 	(function () {
