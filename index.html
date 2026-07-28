@@ -80,7 +80,10 @@ a { color: inherit; }
 	/* symmetric inset makes .main's 50% resolve to exactly half the page;
 	   the extra bottom padding keeps content clear of the fixed toggle */
 	padding: var(--inset);
-	padding-bottom: calc(var(--inset) * 2 + 3rem + env(safe-area-inset-bottom, 0px));
+	/* derived from --fade-h so the two can't drift apart: at full scroll the
+	   last row must clear the point where the fade is fully transparent,
+	   otherwise it dissolves into the gradient */
+	padding-bottom: calc(var(--fade-h) + 2rem);
 }
 
 /* The toggle sits in a fixed box anchored at top: 0 — an edge that never
@@ -285,8 +288,7 @@ a { color: inherit; }
 	}
 	.wrap {
 		padding: var(--pad);   /* top gap matches the left gap */
-		/* clear the fixed toggle, plus iOS Safari's toolbar inset */
-		padding-bottom: calc(var(--pad) + 4rem + env(safe-area-inset-bottom, 0px));
+		padding-bottom: calc(var(--fade-h) + 2rem);   /* clear the fade — see above */
 	}
 	.main { width: auto; }   /* full width on phones */
 	.dock {
