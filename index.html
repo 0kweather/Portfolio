@@ -44,6 +44,7 @@
 	/* bottom fade: solid up to --fade-solid, dissolved by --fade-h — see .dock */
 	--fade-solid: calc(var(--inset) + 2rem + env(safe-area-inset-bottom, 0px));
 	--fade-h: calc(var(--inset) + 7rem + env(safe-area-inset-bottom, 0px));
+	--toolbar: 0px;   /* height iOS Safari's toolbar hides; measured in @supports below */
 	--ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -82,36 +83,49 @@ a { color: inherit; }
 	padding-bottom: calc(var(--inset) * 2 + 3rem + env(safe-area-inset-bottom, 0px));
 }
 
-/* The toggle and the fade behind it live in one element, anchored from the
-   TOP of the viewport and given the *large* viewport height (100lvh — the
-   height with iOS Safari's toolbar collapsed).
+/* The toggle sits in a fixed box anchored at top: 0 — an edge that never
+   moves on iOS, unlike `bottom`, which shifts as Safari's floating toolbar
+   collapses and is why earlier attempts kept drifting.
 
-   Anchoring with `bottom` is what kept failing: on iOS the bottom edge moves
-   as the floating toolbar collapses, and Safari doesn't reliably reposition
-   fixed elements mid-scroll, so the fade stopped short and left a band of
-   un-faded rows showing beneath it. `top: 0` never moves, and 100lvh always
-   reaches the lowest the viewport can go, so the bottom is covered in every
-   toolbar state. Keeping both in one box also means they can't drift apart. */
+   The box is 100svh: the SMALL viewport, i.e. the height with the toolbar
+   showing. That is the region guaranteed to be on screen in either state,
+   so the buttons are always visible. (100lvh would put its bottom edge
+   underneath the toolbar and hide them.)
+
+   The fade has the opposite requirement — it must reach the bottom of the
+   LARGE viewport, or a band of un-faded rows appears once the toolbar
+   collapses. So it is a separate layer that hangs below the dock by exactly
+   the toolbar's height. */
 .dock {
 	position: fixed;
 	top: 0; left: 0; right: 0;
-	height: 100vh;      /* fallback */
-	height: 100lvh;
+	height: 100vh;      /* fallback where svh/lvh are unsupported */
 	z-index: 10;
 	display: flex;
 	align-items: flex-end;
 	padding: 0 var(--inset) calc(var(--inset) + env(safe-area-inset-bottom, 0px));
 	pointer-events: none;   /* the page underneath stays clickable */
-	/* stops are absolute lengths measured up from the bottom edge; above
-	   --fade-h the gradient simply stays transparent. Fades to the page colour
-	   at zero alpha, not the `transparent` keyword — `transparent` is
-	   transparent *black*, which Safari interpolates through as grey. */
+}
+.dock::before {
+	content: "";
+	position: absolute; left: 0; right: 0;
+	bottom: calc(var(--toolbar) * -1);       /* hang below, down to the lvh bottom */
+	height: calc(var(--toolbar) + var(--fade-h));
+	z-index: -1;                              /* behind the buttons, over the page */
+	/* stops are absolute lengths measured up from this layer's bottom edge.
+	   Fades to the page colour at zero alpha, not the `transparent` keyword —
+	   `transparent` is transparent *black*, which Safari ramps through as grey. */
 	background: linear-gradient(to top,
 		var(--page-bg) 0,
-		var(--page-bg) var(--fade-solid),
-		var(--page-bg-fade) var(--fade-h));
+		var(--page-bg) calc(var(--toolbar) + var(--fade-solid)),
+		var(--page-bg-fade) calc(var(--toolbar) + var(--fade-h)));
 }
 .dock > * { pointer-events: auto; }
+
+@supports (height: 100svh) {
+	:root { --toolbar: calc(100lvh - 100svh); }   /* how much the toolbar hides */
+	.dock { height: 100svh; }
+}
 
 /* ---------- toggle: rounded-rectangle buttons with a status dot ----------
    position comes from .dock, which pins it to the bottom-left corner */
