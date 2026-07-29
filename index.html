@@ -33,7 +33,6 @@
 :root {
 	--base-size: 11px;        /* everything is sized in rem, so this scales the whole page */
 	--page-bg: #fdfdfc;       /* warm off-white */
-	--page-bg-fade: rgba(253, 253, 252, 0);   /* same hue at zero alpha — see .dock */
 	--ink: #24231f;           /* near-black text */
 	--muted: #78746a;         /* works dates — lighter than body text */
 	--rule: #dcd9d2;          /* hairlines between works rows */
@@ -41,10 +40,8 @@
 	--chip: #eceae5;          /* toggle button background */
 	--pad: 32px;    /* mobile page margin */
 	--inset: 32px;  /* desktop page margin — also the toggle's offset from the corner */
-	/* bottom fade: solid up to --fade-solid, dissolved by --fade-h — see .dock */
-	--fade-solid: calc(var(--inset) + 2rem + env(safe-area-inset-bottom, 0px));
-	--fade-h: calc(var(--inset) + 7rem + env(safe-area-inset-bottom, 0px));
-	--toolbar: 0px;   /* height iOS Safari's toolbar hides; measured in @supports below */
+	/* clearance so scrolled content stops above the toggle rather than under it */
+	--dock-clear: calc(var(--inset) * 2 + 3rem + env(safe-area-inset-bottom, 0px));
 	--ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -80,53 +77,28 @@ a { color: inherit; }
 	/* symmetric inset makes .main's 50% resolve to exactly half the page;
 	   the extra bottom padding keeps content clear of the fixed toggle */
 	padding: var(--inset);
-	/* derived from --fade-h so the two can't drift apart: at full scroll the
-	   last row must clear the point where the fade is fully transparent,
-	   otherwise it dissolves into the gradient */
-	padding-bottom: calc(var(--fade-h) + 2rem);
+	padding-bottom: var(--dock-clear);
 }
 
 /* The toggle sits in a fixed box anchored at top: 0 — an edge that never
    moves on iOS, unlike `bottom`, which shifts as Safari's floating toolbar
-   collapses and is why earlier attempts kept drifting.
-
-   The box is 100svh: the SMALL viewport, i.e. the height with the toolbar
-   showing. That is the region guaranteed to be on screen in either state,
-   so the buttons are always visible. (100lvh would put its bottom edge
-   underneath the toolbar and hide them.)
-
-   The fade has the opposite requirement — it must reach the bottom of the
-   LARGE viewport, or a band of un-faded rows appears once the toolbar
-   collapses. So it is a separate layer that hangs below the dock by exactly
-   the toolbar's height. */
+   collapses. The box is 100svh — the SMALL viewport, i.e. the height with
+   the toolbar showing — which is the region guaranteed to be on screen in
+   either state, so the buttons are always visible. No gradient here: the
+   buttons are opaque, so text scrolling underneath just tucks behind them. */
 .dock {
 	position: fixed;
 	top: 0; left: 0; right: 0;
-	height: 100vh;      /* fallback where svh/lvh are unsupported */
+	height: 100vh;      /* fallback where svh is unsupported */
 	z-index: 10;
 	display: flex;
 	align-items: flex-end;
 	padding: 0 var(--inset) calc(var(--inset) + env(safe-area-inset-bottom, 0px));
 	pointer-events: none;   /* the page underneath stays clickable */
 }
-.dock::before {
-	content: "";
-	position: absolute; left: 0; right: 0;
-	bottom: calc(var(--toolbar) * -1);       /* hang below, down to the lvh bottom */
-	height: calc(var(--toolbar) + var(--fade-h));
-	z-index: -1;                              /* behind the buttons, over the page */
-	/* stops are absolute lengths measured up from this layer's bottom edge.
-	   Fades to the page colour at zero alpha, not the `transparent` keyword —
-	   `transparent` is transparent *black*, which Safari ramps through as grey. */
-	background: linear-gradient(to top,
-		var(--page-bg) 0,
-		var(--page-bg) calc(var(--toolbar) + var(--fade-solid)),
-		var(--page-bg-fade) calc(var(--toolbar) + var(--fade-h)));
-}
 .dock > * { pointer-events: auto; }
 
 @supports (height: 100svh) {
-	:root { --toolbar: calc(100lvh - 100svh); }   /* how much the toolbar hides */
 	.dock { height: 100svh; }
 }
 
@@ -283,12 +255,11 @@ a { color: inherit; }
 	/* everything is sized in rem, so this scales the whole page down at once */
 	:root {
 		--base-size: 10px; --pad: 24px;
-		--fade-solid: calc(var(--pad) + 2rem + env(safe-area-inset-bottom, 0px));
-		--fade-h: calc(var(--pad) + 7rem + env(safe-area-inset-bottom, 0px));
+		--dock-clear: calc(var(--pad) + 4rem + env(safe-area-inset-bottom, 0px));
 	}
 	.wrap {
 		padding: var(--pad);   /* top gap matches the left gap */
-		padding-bottom: calc(var(--fade-h) + 2rem);   /* clear the fade — see above */
+		padding-bottom: var(--dock-clear);
 	}
 	.main { width: auto; }   /* full width on phones */
 	.dock {
