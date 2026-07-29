@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#fdfdfc">
+<meta name="theme-color" content="#fdfdfc" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#191919" media="(prefers-color-scheme: dark)">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>Alex Bronzini-Vender</title>
 <meta name="description" content="Alex Bronzini-Vender is a freelance writer from New York, NY.">
@@ -45,6 +46,28 @@
 	--ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* ---------- dark mode ----------
+   System-driven only — there's no manual switch, so nothing here depends on a
+   class or attribute being set by JS. Every color on the page comes from the
+   tokens above, so overriding them is the whole theme.
+
+   The greys are picked to hold the same *contrast ratios* against the page as
+   their light counterparts, not to be numeric inversions: --muted stays ~4.6:1
+   against the background and --rule stays a hairline, which is what keeps the
+   works table reading the same way in both themes. --rule and --chip are a
+   step stronger than the math alone would give, because a low-contrast light
+   line on a dark field disappears sooner than the reverse. */
+@media (prefers-color-scheme: dark) {
+	:root {
+		--page-bg: #191919;
+		--ink: #c5c5c5;
+		--muted: #848484;   /* works dates — ~4.6:1 on the page, matching light mode */
+		--rule: #383838;
+		--chip: #2a2a2a;
+		--accent: #d96a4a;  /* oxblood lifted until the focus ring clears 5:1 on #191919 */
+	}
+}
+
 /* ============================================================
    Reset / base
    ============================================================ */
@@ -52,6 +75,9 @@
 html, body { margin: 0; padding: 0; min-height: 100%; background-color: var(--page-bg); }
 html {
 	font-size: var(--base-size); -webkit-text-size-adjust: none;
+	/* lets the browser paint its own furniture (scrollbars, overscroll gutter,
+	   the flash before first paint) to match the active theme */
+	color-scheme: light dark;
 }
 body {
 	-webkit-font-smoothing: antialiased;

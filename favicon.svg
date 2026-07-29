@@ -1,6 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-<rect width="100" height="100" fill="#fdfdfc"/>
-<g fill="#373734">
+<style>
+/* The tile carries its own background, so it has to follow the system theme on
+   its own: the page's tokens don't cross into an externally-referenced icon.
+   Keep this block free of angle brackets — an SVG is XML, where style content
+   is parsed as markup, so even a bracket inside a comment breaks the file. */
+:root { --tile: #fdfdfc; --glyph: #373734; }
+@media (prefers-color-scheme: dark) {
+	:root { --tile: #191919; --glyph: #c5c5c5; }
+}
+</style>
+<rect width="100" height="100" fill="var(--tile)"/>
+<g fill="var(--glyph)">
 <path transform="matrix(0.04461942,0,0,-0.04461942,14.1706,65.2598)" d="M208 -16C286 -16 337 17 362 66C361 51 360 37 360 22V0H457V302C457 426 393 501 259 501C135 501 59 426 54 331H160C163 386 200 422 266 422C320 422 354 391 354 348C354 321 341 307 303 302L216 289C121 276 41 235 41 133C41 40 120 -16 208 -16ZM148 136C148 183 189 205 246 216L301 227C330 232 348 238 356 248V186C356 112 302 62 231 62C185 62 148 89 148 136Z"/>
 <path transform="matrix(0.04461942,0,0,-0.04461942,36.6142,65.2598)" d="M327 -16C458 -16 549 84 549 242C549 397 456 501 327 501C253 501 201 465 170 418C171 432 172 446 172 461V700H68V0H172V23C172 38 172 51 170 67C198 19 253 -16 327 -16ZM166 242C166 350 223 419 304 419C386 419 442 346 442 242C442 137 386 65 304 65C223 65 166 137 166 242Z"/>
 <path transform="matrix(0.04461942,0,0,-0.04461942,62.0472,65.2598)" d="M194 0H311L492 485H384L271 150C264 129 259 114 254 95C249 114 245 129 237 150L122 485H10Z"/>
