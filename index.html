@@ -41,9 +41,21 @@
 	--chip: #eceae5;          /* toggle button background */
 	--pad: 32px;    /* mobile page margin */
 	--inset: 32px;  /* desktop page margin — also the toggle's offset from the corner */
-	/* clearance so scrolled content stops above the toggle rather than under it */
-	--dock-clear: calc(var(--inset) * 2 + 3rem + env(safe-area-inset-bottom, 0px));
+	/* Clearance so scrolled content stops above the toggle rather than under it.
+	   --toolbar-slack covers the gap between the dock's bottom edge and the true
+	   bottom of the page. The dock is 100svh tall (see .dock) so it ends where
+	   Safari's toolbar begins, but fixed elements lay out against the *large*
+	   viewport — so with the toolbar retracted there are (100lvh - 100svh) visible
+	   pixels below the dock. Clearance is measured from the end of the document,
+	   so without this term it falls short by exactly that much, which is what let
+	   the last works rows sit under the buttons at full scroll on iOS. Resolves to
+	   zero wherever the viewport has no retractable browser UI. */
+	--toolbar-slack: 0px;
+	--dock-clear: calc(var(--inset) * 2 + 3rem + env(safe-area-inset-bottom, 0px) + var(--toolbar-slack));
 	--ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+@supports (height: 100svh) {
+	:root { --toolbar-slack: calc(100lvh - 100svh); }
 }
 
 /* ---------- dark mode ----------
@@ -305,7 +317,9 @@ a { color: inherit; }
 	/* everything is sized in rem, so this scales the whole page down at once */
 	:root {
 		--base-size: 10px; --pad: 24px;
-		--dock-clear: calc(var(--pad) + 4rem + env(safe-area-inset-bottom, 0px));
+		/* keeps the --toolbar-slack term from the root definition — this is the
+		   breakpoint where iOS actually has a retractable toolbar */
+		--dock-clear: calc(var(--pad) + 4rem + env(safe-area-inset-bottom, 0px) + var(--toolbar-slack));
 	}
 	.wrap {
 		padding: var(--pad);   /* top gap matches the left gap */
