@@ -115,6 +115,10 @@ a { color: inherit; }
 	background: var(--chip);
 	color: var(--ink);
 	text-decoration: none;
+	/* soft white halo separating each button from scrolled content behind it;
+	   box-shadow (not filter: drop-shadow) so it follows this rounded corner
+	   directly rather than tracing the whole toggle group's silhouette */
+	box-shadow: 0 0 4px var(--page-bg), 0 0 14px var(--page-bg), 0 0 14px var(--page-bg);
 	/* background never changes — only the dot reacts */
 }
 .site-nav a::before {
