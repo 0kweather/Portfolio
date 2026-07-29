@@ -133,6 +133,9 @@ a { color: inherit; }
 .site-nav {
 	display: flex; gap: 0.4rem;
 	font-size: 1.5rem; line-height: 1;
+	/* one stacking context for the whole group, so the halos below can share a
+	   single layer underneath every button rather than one layer per button */
+	isolation: isolate;
 }
 .site-nav a {
 	display: inline-flex; align-items: center; gap: 0.5em;
@@ -141,11 +144,28 @@ a { color: inherit; }
 	background: var(--chip);
 	color: var(--ink);
 	text-decoration: none;
-	/* soft white halo separating each button from scrolled content behind it;
-	   box-shadow (not filter: drop-shadow) so it follows this rounded corner
-	   directly rather than tracing the whole toggle group's silhouette */
-	box-shadow: 0 0 4px var(--page-bg), 0 0 14px var(--page-bg), 0 0 14px var(--page-bg);
+	/* positioned (but deliberately z-index: auto, so this stays out of the
+	   stacking-context business) to anchor the ::after halo */
+	position: relative;
 	/* background never changes — only the dot reacts */
+}
+/* Soft page-colored halo separating the buttons from scrolled content behind
+   them. It lives on a pseudo-element in the negative-z layer instead of as a
+   box-shadow on the button itself: a shadow paints together with the element
+   that casts it, so each button's halo landed on top of whichever button
+   preceded it in the DOM, smudging its right edge. Negative z-index puts every
+   halo in one pass that completes before any button background is painted, so
+   all halos end up behind all buttons.
+   Still box-shadow rather than filter: drop-shadow on the group, so it follows
+   each rounded corner directly instead of tracing the whole group's silhouette. */
+.site-nav a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	border-radius: inherit;
+	box-shadow: 0 0 4px var(--page-bg), 0 0 14px var(--page-bg), 0 0 14px var(--page-bg);
+	pointer-events: none;
 }
 .site-nav a::before {
 	content: "";
