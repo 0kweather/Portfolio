@@ -4,7 +4,7 @@
    its own: the page's tokens don't cross into an externally-referenced icon.
    Keep this block free of angle brackets — an SVG is XML, where style content
    is parsed as markup, so even a bracket inside a comment breaks the file. */
-:root { --tile: #fdfdfc; --glyph: #373734; }
+:root { --tile: #ffffff; --glyph: #2e2e2e; }
 @media (prefers-color-scheme: dark) {
 	:root { --tile: #191919; --glyph: #c5c5c5; }
 }
