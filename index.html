@@ -38,7 +38,11 @@
 	--muted: #78746a;         /* works dates — lighter than body text */
 	--rule: #dcd9d2;          /* hairlines between works rows */
 	--accent: #a23c25;        /* oxblood — keyboard focus outline */
-	--chip: #eceae5;          /* toggle button background */
+	--chip: #eceae5;          /* toggle button background — opaque fallback */
+	/* Frosted-glass veil for the toggle buttons. Tuned so that over the bare page
+	   it composites to the same tone as --chip: the buttons look unchanged at rest
+	   and only pick up the blurred page as content scrolls behind them. */
+	--chip-veil: rgba(229, 229, 229, 0.65);
 	--pad: 32px;    /* mobile page margin */
 	--inset: 32px;  /* desktop page margin — also the toggle's offset from the corner */
 	/* Clearance so scrolled content stops above the toggle rather than under it.
@@ -76,6 +80,7 @@
 		--muted: #848484;   /* works dates — ~4.6:1 on the page, matching light mode */
 		--rule: #383838;
 		--chip: #2a2a2a;
+		--chip-veil: rgba(48, 48, 48, 0.65);   /* composites to --chip over the bare page */
 		--accent: #d96a4a;  /* oxblood lifted until the focus ring clears 5:1 on #191919 */
 	}
 }
@@ -101,7 +106,15 @@ body {
    ancestor can make Safari resolve position: fixed against that ancestor
    instead of the viewport, which drags the toggle and its fade up the page.
    Still CSS-driven, so the page can't be left invisible if JS fails to run. */
-.wrap, .dock { animation: fade-in 0.4s var(--ease) both; }
+.wrap { animation: fade-in 0.4s var(--ease) both; }
+/* backwards, not both. `both` keeps the animation in effect permanently, which
+   leaves .dock forever under an opacity animation — that makes it a backdrop
+   root, and the buttons' backdrop-filter then has nothing behind it to sample,
+   so the frosted effect silently does nothing. `forwards` is redundant here
+   anyway: the final keyframe is opacity: 1, already the default. `backwards`
+   still holds opacity 0 before the animation starts, so the fade is identical
+   and the page still can't be left invisible if JS fails. */
+.dock { animation: fade-in 0.4s var(--ease) backwards; }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 a { color: inherit; }
 :focus { outline: none; }
@@ -178,6 +191,21 @@ a { color: inherit; }
 	border-radius: inherit;
 	box-shadow: 0 0 4px var(--page-bg), 0 0 14px var(--page-bg), 0 0 14px var(--page-bg);
 	pointer-events: none;
+}
+/* Frosted glass. Where backdrop-filter is available the buttons stop hiding what
+   is behind them and instead let it through blurred, so scrolled content reads as
+   a soft wash inside each chip rather than fading out around it.
+   The halo and the stacking context it needed are both switched off here: the
+   blur is what separates the buttons from the page now, and isolation: isolate
+   would make .site-nav a backdrop root, leaving the filter nothing to sample. */
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+	.site-nav { isolation: auto; }
+	.site-nav a {
+		background: var(--chip-veil);
+		-webkit-backdrop-filter: blur(9px);
+		backdrop-filter: blur(9px);
+	}
+	.site-nav a::after { content: none; }
 }
 .site-nav a::before {
 	content: "";
