@@ -242,10 +242,19 @@ a { color: inherit; }
    ============================================================ */
 .main {
 	/* left-anchored, spanning to the halfway mark: with .wrap's symmetric
-	   inset, 50% of its content box puts the right edge at exactly 50vw */
+	   inset, 50% of its content box puts the right edge at exactly 50vw.
+	   Overridden below while the works page is active. */
 	width: 50%;
 	/* lets the works table respond to its own width rather than the viewport's */
 	container-type: inline-size;
+}
+/* Works gets more room than the about page: on desktop it's a dense table of
+   titles and mastheads that wraps hard at half the page, so it takes 60% while
+   the single about paragraph stays at 50%. Scoped with :has() to the page's
+   own active state rather than a page-level class, and to desktop only — the
+   mobile breakpoint below already collapses .main to full width regardless. */
+@media (min-width: 761px) {
+	.main:has(.page.active.works-table) { width: 60%; }
 }
 
 .page { display: none; }
